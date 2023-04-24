@@ -1,0 +1,89 @@
+name: Build Template
+on:
+  workflow_call:
+    inputs:
+      businessGroupId:
+        required: true
+        type: string
+env:
+  BUSINESS_GROUP_ID: ${{ inputs.businessGroupId }}
+  MAVEN_CACHE_FOLDER: ${{ github.workspace }}/.m2/repository
+  MAVEN_HOME: ${{ github.workspace }}/maven/apache-maven-3.9.1
+  SYSTEM_ACCESS_TOKEN: ${{ secrets.SYSTEM_ACCESS_TOKEN }}
+  SETTINGS_XML_PATH: ${{ github.workspace }}/settings/settings.xml
+
+  testResultsFiles: '**/target/surefire-reports/TEST-*.xml'
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+          - name: Checkout
+            uses: actions/checkout@v3
+
+          - name: Download Maven 3.9.1
+            run: wget https://dlcdn.apache.org/maven/maven-3/3.9.1/binaries/apache-maven-3.9.1-bin.zip
+          - name : mkdir
+            run : |
+                    mkdir -p ${{ env.MAVEN_HOME }}
+                    echo '[{ "id": "anypoint-exchange-v3", "username": "~~~Token~~~", "password": "${{ env.SYSTEM_ACCESS_TOKEN }}" }]'
+
+          - name: Extract Maven 3.9.1
+            run: unzip apache-maven-3.9.1-bin.zip -d ${{ env.MAVEN_HOME }}
+          - name: Set Maven Path
+            run: echo "${{ env.MAVEN_HOME }}/bin" >> $GITHUB_PATH
+          - name: Cache Maven repository
+            uses: actions/cache@v2
+            with:
+              path: ${{ env.MAVEN_CACHE_FOLDER }}
+              key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+              restore-keys: |
+                ${{ runner.os }}-maven-
+          - name: Set up JDK 11
+            uses: actions/setup-java@v3 
+            with: 
+              java-version: "11" 
+              distribution: temurin
+#           - name: maven-settings-xml-action
+#             uses: whelk-io/maven-settings-xml-action@v20
+#             with:
+#               servers: '[{ "id": "anypoint-exchange-v3", "username": "~~~Token~~~", "password": "${{ secrets.SYSTEM_ACCESS_TOKEN }}" }]'
+#               output_file : "${{ env.SETTINGS_XML_PATH }}"
+
+
+#           - name: Define Variables
+#             run: |
+#               PROJECT_VERSION=$(mvn $MAVEN_OPTIONS org.apache.maven.plugins:maven-help-plugin:3.2.0:evaluate -Dexpression=project.version -q -DforceStdout)
+#              echo "##vso[task.setvariable variable=PROJECT_VERSION]$PROJECT_VERSION"
+#              BUILD_NUMBER=$(Build.Repository.Name)-$PROJECT_VERSION-${{ inputs.pipelineType }}
+#              echo "##vso[build.updatebuildnumber]$BUILD_NUMBER"
+#              echo "##vso[task.setvariable variable=BUILD_NUMBER]$BUILD_NUMBER"
+
+#          - name: Build
+#            run: |
+#              mvn -s $(settings.secureFilePath) $MAVEN_OPTIONS -DconnectedAppClientId=$(connectedAppClientId) -DconnectedAppClientSecret=$(connectedAppClientSecret) -Dmunit.failIfNoTests=false clean install
+#
+
+
+#          - name: Set project version
+#            run: |
+#                  PROJECT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+#                  echo "PROJECT_VERSION=$PROJECT_VERSION" >> $GITHUB_ENV
+#
+#           - name: cat settings.xml
+#             run: cat ${{env.SETTINGS_XML_PATH}}
+          - name: build
+            run: |
+                mvn clean package -Dmaven.javadoc.skip=true -B -V -Dmaven.test.skip=true
+          - name: test
+            run: |
+              mvn test -B -V -Dmaven.test.skip=false   -Dusername=~~~Token~~~  -Dpassword=${{ secrets.SYSTEM_ACCESS_TOKEN }}
+            
+
+          - name: Publish artifacts to Exchange
+            run: |          
+             mvn -f "pom.xml" clean deploy \
+             -DaltDeploymentRepository=anypoint-exchange-v3::default::https://maven.anypoint.mulesoft.com/api/v3/organizations/5f523bd0-8a57-4a53-a7a7-19924e6e2037/maven \
+             -Dusername=~~~Token~~~\
+             -Dpassword=${{ secrets.SYSTEM_ACCESS_TOKEN }}
+
+
