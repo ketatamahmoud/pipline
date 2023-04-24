@@ -6,7 +6,7 @@
     <server>
       <id>anypoint-exchange-v3</id>
       <username>~~~Token~~~</username>
-      <password>${token}</password>
+      <password>${{env.token}}</password>
     </server>
 <!--    <server>-->
 <!--      <id>anypoint-exchange-v3</id>-->
