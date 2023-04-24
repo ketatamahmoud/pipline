@@ -73,7 +73,7 @@ jobs:
 #             run: cat ${{env.SETTINGS_XML_PATH}}
           - name: build
             run: |
-                mvn clean package -Dmaven.javadoc.skip=true -B -V -Dmaven.test.skip=true
+                mvn -s "settings/settings.xml" clean install -Dmaven.javadoc.skip=true -B -V -Dmaven.test.skip=true
           - name: test
             run: |
               mvn test -B -V -Dmaven.test.skip=false   -Dusername=~~~Token~~~  -Dpassword=${{ secrets.SYSTEM_ACCESS_TOKEN }}
