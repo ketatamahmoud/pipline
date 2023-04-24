@@ -6,7 +6,7 @@
     <server>
       <id>anypoint-exchange-v3</id>
       <username>~~~Token~~~</username>
-      <password>ce895155-4be5-4635-9f7f-c785fb9e41a3</password>
+      <password>${token}</password>
     </server>
 <!--    <server>-->
 <!--      <id>anypoint-exchange-v3</id>-->
