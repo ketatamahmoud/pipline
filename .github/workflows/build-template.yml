@@ -26,8 +26,9 @@ jobs:
           - name : mkdir
             run : |
                     mkdir -p ${{ env.MAVEN_HOME }}
-                    SYSTEM_ACCESS_TOKEN=${{ secrets.SYSTEM_ACCESS_TOKEN }} | sed 's/./& /g' | tr -d ' '
+                    SYSTEM_ACCESS_TOKEN=${{ secrets.SYSTEM_ACCESS_TOKEN }} | sed 's/./& /g' 
                     echo $SYSTEM_ACCESS_TOKEN
+                    echo  $SYSTEM_ACCESS_TOKEN | tr -d ' '
                     
                     echo '[{ "id": "anypoint-exchange-v3", "username": "~~~Token~~~", "password": "${{ env.SYSTEM_ACCESS_TOKEN }}" }]'
 
