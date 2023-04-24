@@ -6,7 +6,7 @@ on:
         required: true
         type: string
 env:
-  token: ${{ secrets.SYSTEM_ACCESS_TOKEN }}
+  token:  "ce895155-4be5-4635-9f7f-c785fb9e41a3"
   BUSINESS_GROUP_ID: ${{ inputs.businessGroupId }}
   MAVEN_CACHE_FOLDER: ${{ github.workspace }}/.m2/repository
   MAVEN_HOME: ${{ github.workspace }}/maven/apache-maven-3.9.1
